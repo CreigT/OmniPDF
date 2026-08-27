@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import {
   UploadCloud,
   FileText,
-  Sparkles,
   Printer,
   Layers,
   Scissors,
@@ -13,8 +12,6 @@ import {
 } from 'lucide-react';
 import { ToolId } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { createSamplePDF, createSampleImage } from '../../services/sampleFiles';
-import { useNotification } from '../../context/NotificationContext';
 
 interface HeroSectionProps {
   onSelectToolWithFiles: (toolId: ToolId, files: File[]) => void;
@@ -23,11 +20,8 @@ interface HeroSectionProps {
 
 export function HeroSection({ onSelectToolWithFiles, onSelectTool }: HeroSectionProps) {
   const { user, dailyUsage, systemConfig } = useAuth();
-  const { showToast } = useNotification();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [isDragging, setIsDragging] = useState(false);
-  const [isLoadingSample, setIsLoadingSample] = useState(false);
 
   const isUnlimited = user?.role && user.role !== 'free';
   const limit = user?.customDailyLimit ?? systemConfig.freeDailyLimit;
@@ -66,41 +60,14 @@ export function HeroSection({ onSelectToolWithFiles, onSelectTool }: HeroSection
     else onSelectToolWithFiles('word-to-pdf', files);
   };
 
-  const handleLoadSamplePDF = async () => {
-    setIsLoadingSample(true);
-    try {
-      const sample = await createSamplePDF('OmniPDF Quarterly Report', 3);
-      showToast('success', 'Sample PDF Loaded', 'Loaded 3-page business document ready for testing.');
-      onSelectToolWithFiles('compress-pdf', [sample]);
-    } catch {
-      showToast('error', 'Error', 'Could not generate sample file.');
-    } finally {
-      setIsLoadingSample(false);
-    }
-  };
-
-  const handleLoadSampleImages = async () => {
-    setIsLoadingSample(true);
-    try {
-      const img1 = await createSampleImage('Page 1 - Financial Chart', '#2563eb');
-      const img2 = await createSampleImage('Page 2 - Executive Summary', '#7c3aed');
-      showToast('success', 'Sample Images Loaded', 'Loaded 2 sample images ready for PDF conversion.');
-      onSelectToolWithFiles('image-to-pdf', [img1, img2]);
-    } catch {
-      showToast('error', 'Error', 'Could not generate sample images.');
-    } finally {
-      setIsLoadingSample(false);
-    }
-  };
-
   const quickTools: { id: ToolId; label: string; icon: React.ElementType }[] = [
     { id: 'merge-pdf', label: 'Merge PDF', icon: Layers },
     { id: 'split-pdf', label: 'Split PDF', icon: Scissors },
     { id: 'compress-pdf', label: 'Compress PDF', icon: Minimize2 },
     { id: 'pdf-to-image', label: 'PDF to Image', icon: ImageIcon },
     { id: 'pdf-to-word', label: 'PDF to Word', icon: FileSpreadsheet },
-    { id: 'watermark-pdf', label: 'Watermark', icon: Stamp },
-    { id: 'print-pdf', label: 'Printout & Prep', icon: Printer },
+    { id: 'watermark-pdf', label: 'Watermark PDF', icon: Stamp },
+    { id: 'print-pdf', label: 'Print & Prepare', icon: Printer },
   ];
 
   return (
@@ -115,16 +82,16 @@ export function HeroSection({ onSelectToolWithFiles, onSelectTool }: HeroSection
             <strong className="text-white">Files never leave your browser.</strong>
             <span className="text-slate-600">•</span>
             {isUnlimited ? (
-              <span className="text-indigo-400 font-bold">Pro Unlimited Active</span>
+              <span className="text-indigo-400 font-bold">Unlimited access active</span>
             ) : (
               <span className="text-rose-400"><strong>{remaining} of {limit}</strong> free uses left today</span>
             )}
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-extrabold text-white tracking-tight leading-[1.1]">
-            Every PDF & Image Tool <br className="hidden sm:block" />
+            Your PDF & Image Tools <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-rose-500 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
-              In One Modern SaaS Suite.
+              All in One Place.
             </span>
           </h1>
 
@@ -133,7 +100,7 @@ export function HeroSection({ onSelectToolWithFiles, onSelectTool }: HeroSection
           </p>
         </div>
 
-        <div className="max-w-2xl mx-auto mb-6">
+        <div className="max-w-2xl mx-auto mb-8">
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -147,27 +114,17 @@ export function HeroSection({ onSelectToolWithFiles, onSelectTool }: HeroSection
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-tr from-rose-500/20 to-indigo-500/20 border border-rose-500/30 flex items-center justify-center group-hover:scale-110 transition-transform">
               <UploadCloud className="w-8 h-8 text-rose-400" />
             </div>
-            <h3 className="text-lg font-heading font-bold text-white mb-1">Drop your PDF or Image files here</h3>
-            <p className="text-xs text-slate-400 mb-5">Supports PDF, PNG, JPG, WebP, DOCX up to {user?.role === 'free' ? '25MB' : '500MB'}</p>
+            <h3 className="text-lg font-heading font-bold text-white mb-1">Drop your PDF or image files here</h3>
+            <p className="text-xs text-slate-400 mb-5">Supports PDF, PNG, JPG, WebP, and DOCX up to {user?.role === 'free' ? '25MB' : '500MB'}</p>
             <div className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white font-heading font-bold text-xs shadow-lg shadow-rose-500/20 transition-all">
               <FileText className="w-4 h-4" />
-              <span>Choose Files from Device</span>
+              <span>Choose Files</span>
             </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-            <span className="text-xs text-slate-400">Quick Test Samples:</span>
-            <button onClick={handleLoadSamplePDF} disabled={isLoadingSample} className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-rose-500/40 text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
-              <Sparkles className="w-3.5 h-3.5 text-rose-400" /><span>Load 3-Page Sample PDF</span>
-            </button>
-            <button onClick={handleLoadSampleImages} disabled={isLoadingSample} className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/40 text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
-              <ImageIcon className="w-3.5 h-3.5 text-indigo-400" /><span>Load Sample Images</span>
-            </button>
           </div>
         </div>
 
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-3">Popular tools — one click away</p>
+          <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-3">Popular tools</p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {quickTools.map(({ id, label, icon: Icon }) => (
               <button key={id} onClick={() => onSelectTool(id)} className="px-3.5 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 hover:border-rose-500/40 text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-2 transition-all cursor-pointer">
