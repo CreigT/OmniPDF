@@ -15,13 +15,12 @@ import { UserDashboard } from './components/dashboard/UserDashboard';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { TOOLS } from './data/tools';
-import { ToolId, ToolDefinition } from './types';
-import { Sparkles, Info, X } from 'lucide-react';
+import { ToolId } from './types';
 import { stripeService } from './services/stripeService';
 import { updatePageSEO } from './services/seoService';
 
 function AppContent() {
-  const { user, isQuotaModalOpen, closeQuotaModal, quotaModalReason, systemConfig, upgradeSubscription } =
+  const { user, isQuotaModalOpen, closeQuotaModal, quotaModalReason, upgradeSubscription } =
     useAuth();
   const { showToast } = useNotification();
 
@@ -30,7 +29,6 @@ function AppContent() {
   const [activeToolId, setActiveToolId] = useState<ToolId>('compress-pdf');
   const [toolInitialFiles, setToolInitialFiles] = useState<File[]>([]);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   // Deep Link URL initialization on load
   useEffect(() => {
@@ -96,28 +94,19 @@ function AppContent() {
   };
 
   const handleNavigate = (view: 'home' | 'dashboard' | 'admin' | 'pricing') => {
+    if (view === 'dashboard' && !user) {
+      setCurrentView('home');
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
-      {/* Announcement Banner */}
-      {systemConfig.announcementBanner.enabled && !bannerDismissed && (
-        <div className="bg-gradient-to-r from-rose-600 via-purple-600 to-indigo-600 px-4 py-2 text-center text-xs font-semibold text-white flex items-center justify-center gap-2 relative">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>{systemConfig.announcementBanner.message}</span>
-          <button
-            onClick={() => setBannerDismissed(true)}
-            className="absolute right-3 p-1 rounded hover:bg-white/20 text-white/80 hover:text-white cursor-pointer"
-            title="Dismiss"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {/* Main Navbar */}
+      {/* Main Navbar — includes the single Pro Launch announcement bar */}
       <Navbar
         currentView={currentView}
         onNavigate={handleNavigate}
@@ -149,7 +138,7 @@ function AppContent() {
           />
         )}
 
-        {currentView === 'dashboard' && (
+        {currentView === 'dashboard' && user && (
           <UserDashboard
             onSelectTool={handleSelectTool}
             onNavigateToPricing={() => handleNavigate('pricing')}
