@@ -1,0 +1,6 @@
+{
+  "name": "OmniPDF SaaS Platform",
+  "description": "Enterprise-grade PDF & Image processing SaaS suite featuring Merge, Split, Compress, Image/Doc conversions, Printout tools, 3/day free tier quota engine, Pro subscriptions, usage analytics dashboard, and complete Superadmin management suite.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
