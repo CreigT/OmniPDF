@@ -1,3 +1,4 @@
+// OmniPDF purchase model: Free → Pay Once → Credit Packs → Pro Unlimited
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Check, Zap, Clock, CreditCard } from 'lucide-react';
