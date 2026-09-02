@@ -2,13 +2,20 @@
   "buildCommand": "vite build",
   "outputDirectory": "dist",
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/[...slug]"
-    },
+    { "source": "/api/webhook", "destination": "/api/webhook" },
+    { "source": "/api/account", "destination": "/api/account" },
+    { "source": "/api/usage", "destination": "/api/usage" },
+    { "source": "/api/(.*)", "destination": "/api/[...slug]" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+      ]
     }
   ]
 }
